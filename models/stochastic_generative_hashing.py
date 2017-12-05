@@ -8,13 +8,11 @@ import numpy as np
 import scipy.io as sio
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
-from tensorflow.python.framework import function
+
+from utils.quantization import DoublySN
 
 
 class StochasticGenerativeHashing(object):
-    global dtype
-    dtype = tf.float32
-
     def __init__(self, alpha, l2_reg, batch_size, latent_dim, seed, num_iterations,
                  learning_rate, beta1, beta2, train_x, test_x, input_dim, num_examples):
         self.l2_reg = l2_reg
@@ -50,14 +48,14 @@ class StochasticGenerativeHashing(object):
     def _build_graph(self):
         self.G = tf.Graph()
         with self.G.as_default():
-            self.x = tf.placeholder(dtype, shape=[None, self.input_dim], name='x')
+            self.x = tf.placeholder(self.dtype, shape=[None, self.input_dim], name='x')
             self._objective()
             self.session = tf.Session(config=self.config)
 
             self.capacity = 1400
             self.coord = tf.train.Coordinator()
             enqueue_thread = threading.Thread(target=self.enqueue)
-            self.queue = tf.RandomShuffleQueue(capacity=self.capacity, dtypes=[tf.float32],
+            self.queue = tf.RandomShuffleQueue(capacity=self.capacity, dtypes=[self.dtype],
                                                shapes=[[self.input_dim]], min_after_dequeue=self.batch_size)
             self.enqueue_op = self.queue.enqueue_many([self.x])
             # enqueue_thread.isDaemon()
@@ -72,6 +70,7 @@ class StochasticGenerativeHashing(object):
             self.current_dir = os.getcwd()
             self.save_path = self.current_dir + "/summaries/dasa_model"
             self.train_writer = tf.summary.FileWriter(self.save_path, self.session.graph)
+            self.dtype =tf.float32
 
     def _objective(self):
         self._build_model()
@@ -95,11 +94,11 @@ class StochasticGenerativeHashing(object):
         with tf.name_scope('decode'):
             self.w_decode = tf.Variable(
                 tf.random_normal([self.latent_dim, self.input_dim], stddev=1.0 / tf.sqrt(float(self.latent_dim)),
-                                 dtype=dtype), name='w_decode')
+                                 dtype=self.dtype), name='w_decode')
 
         with tf.name_scope('scale'):
-            scale_para = tf.Variable(tf.constant(self.train_var, dtype=dtype), name="scale_para")
-            shift_para = tf.Variable(tf.constant(self.train_var, dtype=dtype), name="shift_para")
+            scale_para = tf.Variable(tf.constant(self.train_var, dtype=self.dtype), name="scale_para")
+            shift_para = tf.Variable(tf.constant(self.train_var, dtype=self.dtype), name="shift_para")
 
         self.x_recon = tf.matmul(self.y_out, self.w_decode) * tf.abs(scale_para) + shift_para
 
@@ -107,12 +106,12 @@ class StochasticGenerativeHashing(object):
         with tf.name_scope('encode'):
             self.w_encode = tf.Variable(
                 tf.random_normal([self.input_dim, self.latent_dim], stddev=1.0 / tf.sqrt(float(self.input_dim)),
-                                 dtype=dtype), name='w_encode')
-            b_encode = tf.Variable(tf.random_normal([self.latent_dim], dtype=dtype), name='b_encode')
+                                 dtype=self.dtype), name='w_encode')
+            b_encode = tf.Variable(tf.random_normal([self.latent_dim], dtype=self.dtype), name='b_encode')
             self.h_encode = tf.matmul(self.x, self.w_encode) + b_encode
             # determinastic output
-            h_epsilon = tf.ones(shape=tf.shape(self.h_encode), dtype=dtype) * .5
-        self.y_out, self.pout = self.DoublySN(self.h_encode, h_epsilon)
+            h_epsilon = tf.ones(shape=tf.shape(self.h_encode), dtype=self.dtype) * .5
+        self.y_out, self.pout = DoublySN(self.h_encode, h_epsilon)
 
     def train_neural_network(self):
         train_print = "Training DASA Model:"
@@ -214,28 +213,6 @@ class StochasticGenerativeHashing(object):
                 self.session.run(self.enqueue_op, feed_dict={self.x: curr_x})
         except tf.errors.CancelledError:
             print("finished enqueueing")
-
-    @staticmethod
-    @function.Defun(dtype, dtype, dtype, dtype)
-    def DoublySNGrad(logits, epsilon, dprev, dpout):
-
-        prob = 1.0 / (1 + tf.exp(-logits))
-        yout = (tf.sign(prob - epsilon) + 1.0) / 2.0
-        # {-1, 1} coding
-        # yout = tf.sign(prob - epsilon)
-
-        # unbiased
-        dlogits = prob * (1 - prob) * (dprev + dpout)
-
-        depsilon = dprev
-        return dlogits, depsilon
-
-    @staticmethod
-    @function.Defun(dtype, dtype, grad_func=DoublySNGrad)
-    def DoublySN(logits, epsilon):
-        prob = 1.0 / (1 + tf.exp(-logits))
-        yout = (tf.sign(prob - epsilon) + 1.0) / 2.0
-        return yout, prob
 
     @staticmethod
     def show_all_variables():
