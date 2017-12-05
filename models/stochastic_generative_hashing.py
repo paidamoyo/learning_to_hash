@@ -41,6 +41,7 @@ class StochasticGenerativeHashing(object):
         # self.imputation_values = imputation_values
         self.imputation_values = np.zeros(shape=self.input_dim)
         self.num_examples = num_examples
+        self.dtype = tf.float32
 
         self._build_graph()
         self.train_cost, self.train_recon = [], []
@@ -68,9 +69,8 @@ class StochasticGenerativeHashing(object):
             self.saver = tf.train.Saver()
             self.merged = tf.summary.merge_all()
             self.current_dir = os.getcwd()
-            self.save_path = self.current_dir + "/summaries/dasa_model"
+            self.save_path = self.current_dir + "/summaries/sgh_model"
             self.train_writer = tf.summary.FileWriter(self.save_path, self.session.graph)
-            self.dtype =tf.float32
 
     def _objective(self):
         self._build_model()
