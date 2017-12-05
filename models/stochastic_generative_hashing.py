@@ -62,8 +62,7 @@ class StochasticGenerativeHashing(object):
             # enqueue_thread.isDaemon()
             enqueue_thread.start()
             dequeue_op = self.queue.dequeue()
-            self.x_batch, self.t_batch, self.e_batch = tf.train.batch(dequeue_op, batch_size=self.batch_size,
-                                                                      capacity=self.capacity)
+            self.x_batch = tf.train.batch(dequeue_op, batch_size=self.batch_size, capacity=self.capacity)
             self.threads = tf.train.start_queue_runners(coord=self.coord, sess=self.session)
 
             self.saver = tf.train.Saver()
@@ -78,7 +77,8 @@ class StochasticGenerativeHashing(object):
         logging.debug("num batches:{}, batch_size:{} epochs:{}".format(self.num_batches, self.batch_size,
                                                                        int(self.num_iterations / self.num_batches)))
         self.x_recon_loss = tf.nn.l2_loss(self.x_recon - self.x, name=None)
-        cross_entropy_loss = tf.reduce_sum(tf.nn.sigmoid_cross_entropy_with_logits(self.h_encode, self.y_out))
+        cross_entropy_loss = tf.reduce_sum(
+            tf.nn.sigmoid_cross_entropy_with_logits(logits=self.h_encode, labels=self.y_out))
         w_decode_reg = self.l2_reg * tf.nn.l2_loss(self.w_decode, name=None)
         w_encode_reg = self.l2_reg * tf.nn.l2_loss(self.w_encode, name=None)
         self.cost = self.x_recon_loss + self.alpha * cross_entropy_loss + w_decode_reg + w_encode_reg
