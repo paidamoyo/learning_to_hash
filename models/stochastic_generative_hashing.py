@@ -8,20 +8,20 @@ import numpy as np
 import scipy.io as sio
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
+from tensorflow.python.framework import function
 
 
 class StochasticGenerativeHashing(object):
     global dtype
     dtype = tf.float32
 
-    def __init__(self, alpha, l2_reg, batch_size, latent_dim, seed, require_improvement, num_iterations,
-                 learning_rate, beta1, beta2, train_x, valid_x, test_x, input_dim, num_examples):
+    def __init__(self, alpha, l2_reg, batch_size, latent_dim, seed, num_iterations,
+                 learning_rate, beta1, beta2, train_x, test_x, input_dim, num_examples):
         self.l2_reg = l2_reg
         self.alpha = alpha
         self.batch_size = batch_size
         self.latent_dim = latent_dim
         self.seed = seed
-        self.require_improvement = require_improvement
         self.num_iterations = num_iterations
         self.learning_rate, self.beta1, self.beta2 = learning_rate, beta1, beta2
         self.log_file = 'stochastic_generative_hashing.log'
@@ -38,7 +38,6 @@ class StochasticGenerativeHashing(object):
         self.train_mean = self.train_x.mean(axis=0).astype('float64')
         self.train_var = np.clip(self.train_x.var(axis=0), 1e-7, np.inf).astype('float64')
 
-        self.valid_x = valid_x
         self.test_x = test_x
         self.input_dim = input_dim
         # self.imputation_values = imputation_values
@@ -47,7 +46,6 @@ class StochasticGenerativeHashing(object):
 
         self._build_graph()
         self.train_cost, self.train_recon = [], []
-        self.valid_cost, self.valid_recon = [], []
 
     def _build_graph(self):
         self.G = tf.Graph()
@@ -76,6 +74,7 @@ class StochasticGenerativeHashing(object):
             self.train_writer = tf.summary.FileWriter(self.save_path, self.session.graph)
 
     def _objective(self):
+        self._build_model()
         self.num_batches = self.num_examples / self.batch_size
         logging.debug("num batches:{}, batch_size:{} epochs:{}".format(self.num_batches, self.batch_size,
                                                                        int(self.num_iterations / self.num_batches)))
@@ -142,9 +141,10 @@ class StochasticGenerativeHashing(object):
                                                            feed_dict={self.x: x_batch})
 
             if i % 100 == 0:
-                print('Num iteration: %d Loss: %0.04f Monitor Loss %0.04f' % (
+                print('Num iteration: %d Total Loss: %0.04f Recon Loss %0.04f' % (
                     i, batch_cost / batch_size, x_recon_loss / batch_size))
                 self.train_cost.append(batch_cost)
+                self.train_recon.append(x_recon_loss)
 
             if i % 2000 == 0:
                 learning_rate = 0.5 * learning_rate
@@ -215,6 +215,7 @@ class StochasticGenerativeHashing(object):
         except tf.errors.CancelledError:
             print("finished enqueueing")
 
+    @staticmethod
     @function.Defun(dtype, dtype, dtype, dtype)
     def DoublySNGrad(logits, epsilon, dprev, dpout):
 
@@ -229,6 +230,7 @@ class StochasticGenerativeHashing(object):
         depsilon = dprev
         return dlogits, depsilon
 
+    @staticmethod
     @function.Defun(dtype, dtype, grad_func=DoublySNGrad)
     def DoublySN(logits, epsilon):
         prob = 1.0 / (1 + tf.exp(-logits))

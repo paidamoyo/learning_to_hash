@@ -1,2 +1,5 @@
 # Created by .ignore support plugin (hsz.mobi)
 .gitignore
+
+__pycache__/
+models/__pycache__/
