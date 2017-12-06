@@ -12,8 +12,8 @@ class BinaryAEHashing(StochasticGenerativeHashing):
                                              learning_rate, beta1, beta2, train_x, test_x, test_queries, input_dim,
                                              num_examples)
 
-        self.log_file = 'compressive_hashing.log'
-        self.model_results = 'CAEH_mnsit_'
+        self.log_file = 'binary_hashing.log'
+        self.model_results = 'BAEH_mnsit_'
 
     def _objective(self):
         self._build_model()
