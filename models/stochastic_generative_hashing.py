@@ -1,6 +1,5 @@
 import logging
 import os
-import threading
 import time
 from datetime import timedelta
 
@@ -52,18 +51,6 @@ class StochasticGenerativeHashing(object):
             self.x = tf.placeholder(self.dtype, shape=[None, self.input_dim], name='x')
             self._objective()
             self.session = tf.Session(config=self.config)
-
-            self.capacity = 1400
-            self.coord = tf.train.Coordinator()
-            enqueue_thread = threading.Thread(target=self.enqueue)
-            self.queue = tf.RandomShuffleQueue(capacity=self.capacity, dtypes=[self.dtype],
-                                               shapes=[[self.input_dim]], min_after_dequeue=self.batch_size)
-            self.enqueue_op = self.queue.enqueue_many([self.x])
-            # enqueue_thread.isDaemon()
-            enqueue_thread.start()
-            dequeue_op = self.queue.dequeue()
-            self.x_batch = tf.train.batch(dequeue_op, batch_size=self.batch_size, capacity=self.capacity)
-            self.threads = tf.train.start_queue_runners(coord=self.coord, sess=self.session)
 
             self.saver = tf.train.Saver()
             self.merged = tf.summary.merge_all()
@@ -132,8 +119,8 @@ class StochasticGenerativeHashing(object):
 
         for i in range(self.num_iterations):
             # Batch Training
-            run_options = tf.RunOptions(timeout_in_ms=4000)
-            x_batch = self.session.run([self.x_batch], options=run_options)
+            indx = np.random.choice(self.input_dim, self.batch_size)
+            x_batch = self.train_x[indx]
             batch_size = len(x_batch)
             # Ending time.
             _, x_recon_loss, batch_cost = self.session.run([self.optimize, self.x_recon_loss, self.cost],
@@ -160,9 +147,6 @@ class StochasticGenerativeHashing(object):
         print(time_dif_print)
         logging.debug(time_dif_print)
         # shutdown everything to avoid zombies
-        self.session.run(self.queue.close(cancel_pending_enqueues=True))
-        self.coord.request_stop()
-        self.coord.join(self.threads)
         return end_time, para_list
 
     def train_test(self):
@@ -188,31 +172,6 @@ class StochasticGenerativeHashing(object):
         sio.savemat(filename,
                     {'h_train': h_train, 'h_test': h_test, 'train_time': end_time, 'W_encode': W, 'b_encode': b, 'U': U,
                      'shift': shift, 'scale': scale})  # define doubly stochastic neuron with gradient by DeFun
-
-    def enqueue(self):
-        """ Iterates over our data puts small junks into our queue."""
-        # TensorFlow Input Pipelines for Large Data Sets
-        # ischlag.github.io
-        # http://ischlag.github.io/2016/11/07/tensorflow-input-pipeline-for-large-datasets/
-        # http://web.stanford.edu/class/cs20si/lectures/slides_09.pdf
-        under = 0
-        max = len(self.train_x)
-        try:
-            while not self.coord.should_stop():
-                # print("starting to write into queue")
-                upper = under + self.capacity
-                # print("try to enqueue ", under, " to ", upper)
-                if upper <= max:
-                    curr_x = self.train_x[under:upper]
-                    under = upper
-                else:
-                    rest = upper - max
-                    curr_x = np.concatenate((self.train_x[under:max], self.train_x[0:rest]))
-                    under = rest
-
-                self.session.run(self.enqueue_op, feed_dict={self.x: curr_x})
-        except tf.errors.CancelledError:
-            print("finished enqueueing")
 
     @staticmethod
     def show_all_variables():
