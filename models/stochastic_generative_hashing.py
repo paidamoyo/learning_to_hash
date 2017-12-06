@@ -8,7 +8,7 @@ import scipy.io as sio
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
-from utils.metrics import plot_cost, recall_n
+from utils.metrics import plot_cost, recall_n, plot_recon
 from utils.quantization import DoublySN
 
 
@@ -23,6 +23,7 @@ class StochasticGenerativeHashing(object):
         self.num_iterations = num_iterations
         self.learning_rate, self.beta1, self.beta2 = learning_rate, beta1, beta2
         self.log_file = 'stochastic_generative_hashing.log'
+        self.model_results = 'SGH_mnsit_'
         logging.basicConfig(filename=self.log_file, filemode='w', level=logging.DEBUG)
         np.random.seed(seed)
         tf.set_random_seed(seed)
@@ -60,7 +61,7 @@ class StochasticGenerativeHashing(object):
             self.saver = tf.train.Saver()
             self.merged = tf.summary.merge_all()
             self.current_dir = os.getcwd()
-            self.save_path = self.current_dir + "/summaries/sgh_model"
+            self.save_path = self.current_dir + "/summaries/" + self.model_results
             self.train_writer = tf.summary.FileWriter(self.save_path, self.session.graph)
 
     def _objective(self):
@@ -68,11 +69,11 @@ class StochasticGenerativeHashing(object):
         self.num_batches = self.num_examples / self.batch_size
         logging.debug("num batches:{}, batch_size:{} epochs:{}".format(self.num_batches, self.batch_size,
                                                                        int(self.num_iterations / self.num_batches)))
-        self.x_recon_loss = tf.nn.l2_loss(self.x_recon - self.x, name=None)
-        cross_entropy_loss = tf.reduce_sum(
+        self.x_recon_loss = tf.losses.mean_squared_error(predictions=self.x_recon, labels=self.x)
+        cross_entropy_loss = tf.reduce_mean(
             tf.nn.sigmoid_cross_entropy_with_logits(logits=self.h_encode, labels=self.y_out))
-        w_decode_reg = self.l2_reg * tf.nn.l2_loss(self.w_decode, name=None)
-        w_encode_reg = self.l2_reg * tf.nn.l2_loss(self.w_encode, name=None)
+        w_decode_reg = self.l2_reg * tf.nn.l2_loss(self.w_decode) / self.batch_size
+        w_encode_reg = self.l2_reg * tf.nn.l2_loss(self.w_encode) / self.batch_size
         self.cost = self.x_recon_loss + self.alpha * cross_entropy_loss + w_decode_reg + w_encode_reg
 
         optimizer = tf.train.AdamOptimizer(self.learning_rate)
@@ -106,7 +107,7 @@ class StochasticGenerativeHashing(object):
         self.y_out, self.pout = DoublySN(self.h_encode, h_epsilon)
 
     def train_neural_network(self):
-        train_print = "Training DASA Model:"
+        train_print = "Training {} Model:".format(self.model_results)
         params_print = "Parameters:, l2_reg:{}, learning_rate:{}," \
                        " momentum: beta1={} beta2={}, batch_size:{}, batch_norm:{}," \
                        "latent_dim:{}, num_of_batches:{}" \
@@ -126,14 +127,13 @@ class StochasticGenerativeHashing(object):
             # Batch Training
             indx = np.random.choice(self.input_dim, self.batch_size)
             x_batch = self.train_x[indx]
-            batch_size = len(x_batch)
             # Ending time.
             _, x_recon_loss, batch_cost = self.session.run([self.optimize, self.x_recon_loss, self.cost],
                                                            feed_dict={self.x: x_batch})
 
             if i % 100 == 0:
                 print_iteration = 'Num iteration: %d Total Loss: %0.04f Recon Loss %0.04f' % (
-                    i, batch_cost / batch_size, x_recon_loss / batch_size)
+                    i, batch_cost, x_recon_loss)
                 print(print_iteration)
                 logging.debug(print_iteration)
                 self.train_cost.append(batch_cost)
@@ -175,15 +175,30 @@ class StochasticGenerativeHashing(object):
         h_train = self.binarize(epsilon=epsilon, logits=train_logits)
         print("h_train:{}".format(h_train[0]))
 
-        filename = 'results/SGH_mnist_' + str(self.latent_dim) + 'bit.mat'
+        test_xhat, test_recon_loss, test_cost = self.session.run([self.x_recon, self.x_recon_loss, self.cost],
+                                                                 feed_dict={self.x: self.test_x})
+
+        template = np.hstack([np.vstack([self.test_x[j].reshape(28, 28), test_xhat[j].reshape(28, 28)
+                                         ]) for j in range(30)])
+
+        train_xhat, train_recon_loss, train_cost = self.session.run([self.x_recon, self.x_recon_loss, self.cost],
+                                                                    feed_dict={self.x: self.train_x})
+
+        logging.debug(
+            "Train: recon:{}, cost:{}, Test: recon:{}, cost:{}".format(train_recon_loss, train_cost, test_recon_loss,
+                                                                       test_cost))
+
+        filename = 'results/' + self.model_results + str(self.latent_dim) + 'bit.mat'
         sio.savemat(filename,
                     {'h_train': h_train, 'h_test': h_test, 'train_time': end_time,
                      'W_encode': W, 'b_encode': b, 'U': U,
                      'shift': shift, 'scale': scale,
-                     'train_cost': self.train_cost})  # define doubly stochastic neuron with gradient by DeFun
+                     'train_cost': self.train_cost, 'test_recon': test_recon_loss,
+                     'test_cost': test_cost})  # define doubly stochastic neuron with gradient by DeFun
 
         plot_cost(self.train_cost)
         recall_n(test_data=h_test, train_data=h_train)
+        plot_recon(template=template)
 
     @staticmethod
     def binarize(epsilon, logits):

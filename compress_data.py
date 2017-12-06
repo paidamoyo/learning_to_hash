@@ -32,11 +32,13 @@ if __name__ == '__main__':
 
     test_data = sio.loadmat('dataset/mnist_test.mat')
     test_x = test_data['Xtest']
-
-    queries_idx = np.random.choice(np.arange(test_x.shape[0]), size=FLAGS.queries)
-    test_queries = test_x[queries_idx]
+    if FLAGS.queries != test_x.shape[0]:
+        queries_idx = np.random.choice(np.arange(test_x.shape[0]), size=FLAGS.queries)
+        test_queries = test_x[queries_idx]
+        euclidean_distance(test_data=test_queries, train_data=train_x)
+    else:
+        test_queries = test_x
     print("test_x:{}, train_x:{}, test_queries:{}".format(test_x.shape, train_x.shape, test_queries.shape))
-    test_true_distance = euclidean_distance(test_data=test_queries, train_data=train_x)
 
     sgh = StochasticGenerativeHashing(batch_size=FLAGS.batch_size,
                                       learning_rate=FLAGS.learning_rate,

@@ -23,7 +23,3 @@ def DoublySN(logits, epsilon):
     prob = 1.0 / (1 + tf.exp(-logits))
     yout = (tf.sign(prob - epsilon) + 1.0) / 2.0
     return yout, prob
-
-
-def compressive_binarize(logits):
-    return

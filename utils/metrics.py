@@ -102,3 +102,12 @@ def euclidean_distance(test_data, train_data, nearest_neighbors=10):
             print("iteration:{}, knn:{}, dist:{}".format(idx, len(k_nn), dist))
     np.save("results/test_l2_nn", test_ranked_l2)
     return test_ranked_l2
+
+
+def plot_recon(template):
+    plt.figure(figsize=(60, 60))
+    # plt.imshow(template, cmap=mpl.cm.Greys)
+    plt.imshow(template)
+    plt.axis('off')
+    plt.grid('off')
+    plt.savefig("results/reconstructed_images")
