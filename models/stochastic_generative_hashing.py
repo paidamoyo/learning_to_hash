@@ -8,6 +8,7 @@ import scipy.io as sio
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
+from utils.metrics import plot_cost
 from utils.quantization import DoublySN
 
 
@@ -170,8 +171,12 @@ class StochasticGenerativeHashing(object):
 
         filename = 'SGH_mnist_' + str(self.latent_dim) + 'bit.mat'
         sio.savemat(filename,
-                    {'h_train': h_train, 'h_test': h_test, 'train_time': end_time, 'W_encode': W, 'b_encode': b, 'U': U,
-                     'shift': shift, 'scale': scale})  # define doubly stochastic neuron with gradient by DeFun
+                    {'h_train': h_train, 'h_test': h_test, 'train_time': end_time,
+                     'W_encode': W, 'b_encode': b, 'U': U,
+                     'shift': shift, 'scale': scale,
+                     'train_cost': self.train_cost})  # define doubly stochastic neuron with gradient by DeFun
+
+        plot_cost(self.train_cost)
 
     @staticmethod
     def show_all_variables():
