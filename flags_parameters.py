@@ -12,4 +12,5 @@ def set_params():
     flags.DEFINE_integer("latent_dim", 64, "latent dimensions of z")
     flags.DEFINE_float("l2_reg", 1e-3, "l2 regularization weight multiplier (just for debugging not optimization)")
     flags.DEFINE_float('alpha', 1e-3, "cross entropy loss weight")
+    flags.DEFINE_integer('queries', 10, "size of test queries")
     return flags

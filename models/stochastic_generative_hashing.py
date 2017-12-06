@@ -8,13 +8,13 @@ import scipy.io as sio
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
-from utils.metrics import plot_cost
+from utils.metrics import plot_cost, recall_n
 from utils.quantization import DoublySN
 
 
 class StochasticGenerativeHashing(object):
     def __init__(self, alpha, l2_reg, batch_size, latent_dim, seed, num_iterations,
-                 learning_rate, beta1, beta2, train_x, test_x, input_dim, num_examples):
+                 learning_rate, beta1, beta2, train_x, test_x, test_queries, input_dim, num_examples):
         self.l2_reg = l2_reg
         self.alpha = alpha
         self.batch_size = batch_size
@@ -35,8 +35,12 @@ class StochasticGenerativeHashing(object):
         self.train_x = train_x
         self.train_mean = self.train_x.mean(axis=0).astype('float64')
         self.train_var = np.clip(self.train_x.var(axis=0), 1e-7, np.inf).astype('float64')
+        train_statistics = "train_mean:{}, train_var:{}".format(self.train_mean, self.train_var)
+        print(train_statistics)
+        logging.debug(train_statistics)
 
         self.test_x = test_x
+        self.test_queries = test_queries
         self.input_dim = input_dim
         # self.imputation_values = imputation_values
         self.imputation_values = np.zeros(shape=self.input_dim)
@@ -86,7 +90,7 @@ class StochasticGenerativeHashing(object):
 
         with tf.name_scope('scale'):
             scale_para = tf.Variable(tf.constant(self.train_var, dtype=self.dtype), name="scale_para")
-            shift_para = tf.Variable(tf.constant(self.train_var, dtype=self.dtype), name="shift_para")
+            shift_para = tf.Variable(tf.constant(self.train_mean, dtype=self.dtype), name="shift_para")
 
         self.x_recon = tf.matmul(self.y_out, self.w_decode) * tf.abs(scale_para) + shift_para
 
@@ -128,8 +132,10 @@ class StochasticGenerativeHashing(object):
                                                            feed_dict={self.x: x_batch})
 
             if i % 100 == 0:
-                print('Num iteration: %d Total Loss: %0.04f Recon Loss %0.04f' % (
-                    i, batch_cost / batch_size, x_recon_loss / batch_size))
+                print_iteration = 'Num iteration: %d Total Loss: %0.04f Recon Loss %0.04f' % (
+                    i, batch_cost / batch_size, x_recon_loss / batch_size)
+                print(print_iteration)
+                logging.debug(print_iteration)
                 self.train_cost.append(batch_cost)
                 self.train_recon.append(x_recon_loss)
 
@@ -159,8 +165,8 @@ class StochasticGenerativeHashing(object):
         scale = para_list['scale/scale_para:0']
         epsilon = 0.5
 
-        # Test
-        test_logits = np.dot(np.array(self.test_x), W) + b
+        # Test Querries
+        test_logits = np.dot(np.array(self.test_queries), W) + b
         pres = 1.0 / (1 + np.exp(-test_logits))
         h_test = (np.sign(pres - epsilon) + 1.0) / 2.0
 
@@ -169,7 +175,7 @@ class StochasticGenerativeHashing(object):
         train_pres = 1.0 / (1 + np.exp(-train_logits))
         h_train = (np.sign(train_pres - epsilon) + 1.0) / 2.0
 
-        filename = 'SGH_mnist_' + str(self.latent_dim) + 'bit.mat'
+        filename = 'results/SGH_mnist_' + str(self.latent_dim) + 'bit.mat'
         sio.savemat(filename,
                     {'h_train': h_train, 'h_test': h_test, 'train_time': end_time,
                      'W_encode': W, 'b_encode': b, 'U': U,
@@ -177,6 +183,7 @@ class StochasticGenerativeHashing(object):
                      'train_cost': self.train_cost})  # define doubly stochastic neuron with gradient by DeFun
 
         plot_cost(self.train_cost)
+        recall_n(test_data=h_test, train_data=h_train)
 
     @staticmethod
     def show_all_variables():
