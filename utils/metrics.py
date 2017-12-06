@@ -53,42 +53,45 @@ def recall_n(test_data, train_data, hamming_neighbors=1000):
     # Ground Truth as each querry's K =10  Euclidian nearest neighbours
     # recall at first N hamming neighbours =
     #   fraction of retrieved true nearest neighbours/ total number of true nearest neighbours
+    print("test_data:{}, train_data:{}".format(test_data.shape, train_data.shape))
     test_l2_nn = np.load("results/test_l2_nn.npy")
-    recall = []
+    test_recall = []
     for idx, test_i in enumerate(test_data):
         # Hamming distance
-        test_hamm_dist = []
         dist = (train_data - test_i)
-        dist = np.sum(dist, axis=1)
-        test_hamm_dist.append(dist)
-        sorted_hamm = sorted(range(len(test_hamm_dist)), key=lambda k: test_hamm_dist[k])
-
-        # Recall caluculation
+        dist = np.sum(dist != 0, axis=1)
+        sorted_dist = sorted(range(len(dist)), key=lambda k: dist[k])
         test_i_l2 = test_l2_nn[idx]
         recall_idx = []
         euclidean_nn = len(test_i_l2)
+        # Recall caluculation
         for nn in np.arange(hamming_neighbors):
-            count = len(set(sorted_hamm[0:nn]) & set(test_i_l2))
-            recall_idx.append(count / euclidean_nn)
-        recall.append(recall_idx)
-    recall = np.array(recall)
+            first_m_sorted_dist = sorted_dist[0:nn]
+            count = len(set(first_m_sorted_dist) & set(test_i_l2))
+            recall_nn = count / euclidean_nn
+            recall_idx.append(recall_nn)
+        if idx % 100 == 0:
+            print("iteration:{}, recall_idx:{}, min_dist:{}, test_i:{}, train_data:{}, sorted_dist:{}".format(
+                idx, len(recall_idx), min(dist), len(test_i), len(train_data[idx]), len(sorted_dist)))
+        test_recall.append(recall_idx)
+    test_recall = np.array(test_recall)
 
-    print("recall:{}".format(recall.shape))
-    np.save('recall', recall)
-    plt.figure()
-    plt.plot(np.arange(hamming_neighbors), np.mean(recall, axis=0))
-    plt.xlabel('Number of retrieved items', fontsize=fontsize)
-    plt.ylabel('Recall', fontsize=fontsize)
-    plt.savefig('results/recall')
+    plot_recall(hamming_neighbors, test_recall)
     return
 
 
+def plot_recall(hamming_neighbors, test_recall):
+    print("test_recall:{}".format(test_recall.shape))
+    np.save('results/test_recall', test_recall)
+    plt.figure()
+    plt.plot(np.arange(hamming_neighbors), np.mean(test_recall, axis=0))
+    plt.xlabel('Number of retrieved items', fontsize=fontsize)
+    plt.ylabel('Recall', fontsize=fontsize)
+    plt.savefig('results/recall')
+
+
 def euclidean_distance(test_data, train_data, nearest_neighbors=10):
-    train_mean = train_data.mean(axis=0).astype('float64')
-    train_var = np.clip(train_data.var(axis=0), 1e-7, np.inf).astype('float64')
     print("train:{}, test:{}".format(train_data.shape, test_data.shape))
-    test_data = (test_data - train_mean) / train_var
-    train_data = (train_data - train_mean) / train_var
     test_ranked_l2 = []
     for idx, test_i in enumerate(test_data):
         dist = np.linalg.norm(train_data - test_i, axis=1)
@@ -96,6 +99,6 @@ def euclidean_distance(test_data, train_data, nearest_neighbors=10):
         k_nn = sorted_l2[0:nearest_neighbors]
         test_ranked_l2.append(k_nn)
         if idx % 100 == 0:
-            print("iteration:{}, knn:{}".format(idx, len(k_nn)))
+            print("iteration:{}, knn:{}, dist:{}".format(idx, len(k_nn), dist))
     np.save("results/test_l2_nn", test_ranked_l2)
     return test_ranked_l2

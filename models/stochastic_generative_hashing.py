@@ -36,7 +36,7 @@ class StochasticGenerativeHashing(object):
         self.train_mean = self.train_x.mean(axis=0).astype('float64')
         self.train_var = np.clip(self.train_x.var(axis=0), 1e-7, np.inf).astype('float64')
         train_statistics = "train_mean:{}, train_var:{}".format(self.train_mean, self.train_var)
-        print(train_statistics)
+        # print(train_statistics)
         logging.debug(train_statistics)
 
         self.test_x = test_x
@@ -167,13 +167,13 @@ class StochasticGenerativeHashing(object):
 
         # Test Querries
         test_logits = np.dot(np.array(self.test_queries), W) + b
-        pres = 1.0 / (1 + np.exp(-test_logits))
-        h_test = (np.sign(pres - epsilon) + 1.0) / 2.0
+        h_test = self.binarize(epsilon, test_logits)
+        print("h_test:{}".format(h_test[0]))
 
         # Train
         train_logits = np.dot(np.array(self.train_x), W) + b
-        train_pres = 1.0 / (1 + np.exp(-train_logits))
-        h_train = (np.sign(train_pres - epsilon) + 1.0) / 2.0
+        h_train = self.binarize(epsilon=epsilon, logits=train_logits)
+        print("h_train:{}".format(h_train[0]))
 
         filename = 'results/SGH_mnist_' + str(self.latent_dim) + 'bit.mat'
         sio.savemat(filename,
@@ -184,6 +184,12 @@ class StochasticGenerativeHashing(object):
 
         plot_cost(self.train_cost)
         recall_n(test_data=h_test, train_data=h_train)
+
+    @staticmethod
+    def binarize(epsilon, logits):
+        pres = 1.0 / (1 + np.exp(-logits))
+        h_test = (np.sign(pres - epsilon) + 1.0) / 2.0
+        return h_test
 
     @staticmethod
     def show_all_variables():
