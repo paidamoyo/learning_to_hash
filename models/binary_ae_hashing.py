@@ -3,7 +3,6 @@ import logging
 import tensorflow as tf
 
 from models.stochastic_generative_hashing import StochasticGenerativeHashing
-from utils.quantization import ba_binarize
 
 
 class BinaryAEHashing(StochasticGenerativeHashing):
@@ -29,26 +28,3 @@ class BinaryAEHashing(StochasticGenerativeHashing):
 
         optimizer = tf.train.AdamOptimizer(self.learning_rate)
         self.optimize = optimizer.minimize(self.cost)
-
-    def _decoder(self):
-        with tf.name_scope('decode'):
-            self.w_decode = tf.Variable(
-                tf.random_normal([self.latent_dim, self.input_dim], stddev=1.0 / tf.sqrt(float(self.latent_dim)),
-                                 dtype=self.dtype), name='w_decode')
-
-        with tf.name_scope('scale'):
-            scale_para = tf.Variable(tf.constant(self.train_var, dtype=self.dtype), name="scale_para")
-            shift_para = tf.Variable(tf.constant(self.train_mean, dtype=self.dtype), name="shift_para")
-
-        self.x_recon = tf.matmul(self.y_out, self.w_decode) * tf.abs(scale_para) + shift_para
-
-    def _encoder(self):
-        with tf.name_scope('encode'):
-            self.w_encode = tf.Variable(
-                tf.random_normal([self.input_dim, self.latent_dim], stddev=1.0 / tf.sqrt(float(self.input_dim)),
-                                 dtype=self.dtype), name='w_encode')
-            b_encode = tf.Variable(tf.random_normal([self.latent_dim], dtype=self.dtype), name='b_encode')
-            self.h_encode = tf.matmul(self.x, self.w_encode) + b_encode
-            # determinastic output
-        h_epsilon = tf.ones(shape=tf.shape(self.h_encode), dtype=self.dtype) * .5
-        self.y_out, self.p_out = ba_binarize(logits=self.h_encode, epsilon=h_epsilon)

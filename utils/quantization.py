@@ -22,9 +22,3 @@ def doubly_SN(logits, epsilon):
     prob = tf.sigmoid(logits)
     yout = (tf.sign(prob - epsilon) + 1.0) / 2.0
     return yout, prob
-
-
-def ba_binarize(logits, epsilon):
-    prob = tf.sigmoid(logits)
-    yout = (tf.sign(prob - epsilon) + 1.0) / 2.0
-    return yout, prob

@@ -47,6 +47,7 @@ def plot_cost(cost):
     plt.xlabel('Iteration')
     plt.ylabel('Total Cost')
     plt.savefig('results/cost')
+    return
 
 
 def recall_n(test_data, train_data, hamming_neighbors=1000):
@@ -77,7 +78,7 @@ def recall_n(test_data, train_data, hamming_neighbors=1000):
     test_recall = np.array(test_recall)
 
     plot_recall(hamming_neighbors, test_recall)
-    return
+    return test_recall
 
 
 def plot_recall(hamming_neighbors, test_recall):
@@ -88,6 +89,7 @@ def plot_recall(hamming_neighbors, test_recall):
     plt.xlabel('Number of retrieved items', fontsize=fontsize)
     plt.ylabel('Recall', fontsize=fontsize)
     plt.savefig('results/recall')
+    return
 
 
 def euclidean_distance(test_data, train_data, nearest_neighbors=10):
@@ -111,3 +113,4 @@ def plot_recon(template):
     plt.axis('off')
     plt.grid('off')
     plt.savefig("results/reconstructed_images")
+    return

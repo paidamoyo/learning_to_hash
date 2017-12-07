@@ -180,30 +180,34 @@ class StochasticGenerativeHashing(object):
                                                                  feed_dict={self.x: self.test_x,
                                                                             self.batch_size_tensor: self.test_x.shape[
                                                                                 0]})
+        size = 30
 
         template = np.hstack([np.vstack([self.test_x[j].reshape(28, 28), test_xhat[j].reshape(28, 28)
-                                         ]) for j in range(30)])
+                                         ]) for j in range(size)])
 
         train_xhat, train_recon_loss, train_cost = self.session.run([self.x_recon, self.x_recon_loss, self.cost],
                                                                     feed_dict={self.x: self.train_x,
                                                                                self.batch_size_tensor:
                                                                                    self.train_x.shape[0]})
 
-        logging.debug(
-            "Train: recon:{}, cost:{}, Test: recon:{}, cost:{}".format(train_recon_loss, train_cost, test_recon_loss,
-                                                                       test_cost))
+        print_cost = "Train: recon:{}, cost:{}, Test: recon:{}, cost:{}".format(train_recon_loss, train_cost,
+                                                                                test_recon_loss, test_cost)
+        logging.debug(print_cost)
+        print(print_cost)
 
         filename = 'results/' + self.model_results + str(self.latent_dim) + 'bit.mat'
+
+        plot_cost(self.train_cost)
+        plot_recon(template=template)
+        test_recall = recall_n(test_data=y_test, train_data=y_train)
         sio.savemat(filename,
                     {'y_train': y_train, 'y_test': y_test, 'train_time': end_time,
                      'W_encode': W, 'b_encode': b, 'U': U,
                      'shift': shift, 'scale': scale,
                      'train_cost': self.train_cost, 'test_recon': test_recon_loss,
-                     'test_cost': test_cost})  # define doubly stochastic neuron with gradient by DeFun
-
-        plot_cost(self.train_cost)
-        plot_recon(template=template)
-        recall_n(test_data=y_test, train_data=y_train)
+                     'test_cost': test_cost,
+                     'test_recall': test_recall, 'test_x': self.test_x[0: size],
+                     'test_xhat': test_xhat[0: size]})  # define doubly stochastic neuron with gradient by DeFun
 
     @staticmethod
     def binarize(logits):
