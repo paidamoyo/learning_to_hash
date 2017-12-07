@@ -44,8 +44,8 @@ label_fontsize = 12
 
 def plot_cost(cost):
     plt.plot(np.array(range(len(cost))) * 100, np.array(cost) / 500)
-    plt.xlabel('Iteration')
-    plt.ylabel('Total Cost')
+    plt.xlabel('Iteration', fontsize=fontsize)
+    plt.ylabel('Total Cost', fontsize=fontsize)
     plt.savefig('results/cost')
     return
 
@@ -77,7 +77,7 @@ def recall_n(test_data, train_data, hamming_neighbors=1000):
         test_recall.append(recall_idx)
     test_recall = np.array(test_recall)
 
-    plot_recall(hamming_neighbors, test_recall)
+    plot_recall(hamming_neighbors, np.mean(test_recall, axis=0))
     return test_recall
 
 
@@ -85,7 +85,7 @@ def plot_recall(hamming_neighbors, test_recall):
     print("test_recall:{}".format(test_recall.shape))
     np.save('results/test_recall', test_recall)
     plt.figure()
-    plt.plot(np.arange(hamming_neighbors), np.mean(test_recall, axis=0))
+    plt.plot(np.arange(hamming_neighbors), test_recall)
     plt.xlabel('Number of retrieved items', fontsize=fontsize)
     plt.ylabel('Recall', fontsize=fontsize)
     plt.savefig('results/recall')
@@ -107,7 +107,8 @@ def euclidean_distance(test_data, train_data, nearest_neighbors=10):
 
 
 def plot_recon(template):
-    plt.figure(figsize=(60, 60))
+    # plt.figure(figsize=(60, 60))
+    plt.figure()
     # plt.imshow(template, cmap=mpl.cm.Greys)
     plt.imshow(template)
     plt.axis('off')
