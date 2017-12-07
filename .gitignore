@@ -5,3 +5,4 @@ __pycache__/
 models/__pycache__/
 summaries/
 !stochastic_generative_hashing.log
+dataset

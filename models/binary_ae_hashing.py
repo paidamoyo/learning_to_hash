@@ -3,7 +3,7 @@ import logging
 import tensorflow as tf
 
 from models.stochastic_generative_hashing import StochasticGenerativeHashing
-from utils.quantization import DoublySN
+from utils.quantization import ba_binarize
 
 
 class BinaryAEHashing(StochasticGenerativeHashing):
@@ -51,4 +51,4 @@ class BinaryAEHashing(StochasticGenerativeHashing):
             self.h_encode = tf.matmul(self.x, self.w_encode) + b_encode
             # determinastic output
         h_epsilon = tf.ones(shape=tf.shape(self.h_encode), dtype=self.dtype) * .5
-        self.y_out, self.pout = DoublySN(logits=self.h_encode, epsilon=h_epsilon)
+        self.y_out, self.p_out = ba_binarize(logits=self.h_encode, epsilon=h_epsilon)
