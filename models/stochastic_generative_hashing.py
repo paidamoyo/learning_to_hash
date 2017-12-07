@@ -28,6 +28,7 @@ class StochasticGenerativeHashing(object):
         np.random.seed(seed)
         tf.set_random_seed(seed)
         self.batch_norm = True
+        self.stochastic = True
 
         self.config = tf.ConfigProto(log_device_placement=False, allow_soft_placement=True)
         self.config.gpu_options.allow_growth = True
@@ -103,22 +104,15 @@ class StochasticGenerativeHashing(object):
                                  dtype=self.dtype), name='w_encode')
             b_encode = tf.Variable(tf.random_normal([self.latent_dim], dtype=self.dtype), name='b_encode')
             self.h_encode = tf.matmul(self.x, self.w_encode) + b_encode
-            # determinastic output
-            # h_epsilon = tf.ones(shape=tf.shape(self.h_encode), dtype=self.dtype) * .5
-            # stochastic output
-            one = np.ones(shape=self.latent_dim, dtype=np.float32)
-            print("z_ones:{}".format(one.shape))
-            h_epsilon = tf.distributions.Uniform(low=-one * 0.5, high=one * 0.5).sample(
-                sample_shape=[self.batch_size_tensor])
-        self.y_out, self.p_out = doubly_SN(self.h_encode, h_epsilon)
+        self.y_out, self.p_out = doubly_SN(self.h_encode, self.h_epsilon())
 
     def train_neural_network(self):
         train_print = "Training {} Model:".format(self.model_results)
         params_print = "Parameters:, l2_reg:{}, learning_rate:{}," \
                        " momentum: beta1={} beta2={}, batch_size:{}, batch_norm:{}," \
-                       "latent_dim:{}, num_of_batches:{}" \
+                       "latent_dim:{}, num_of_batches:{}, stochastic:{}" \
             .format(self.l2_reg, self.learning_rate, self.beta1, self.beta2, self.batch_size,
-                    self.batch_norm, self.latent_dim, self.num_batches)
+                    self.batch_norm, self.latent_dim, self.num_batches, self.stochastic)
         print(train_print)
         print(params_print)
         logging.debug(train_print)
@@ -225,3 +219,11 @@ class StochasticGenerativeHashing(object):
     def show_all_variables():
         model_vars = tf.trainable_variables()
         slim.model_analyzer.analyze_vars(model_vars, print_info=True)
+
+    def h_epsilon(self):
+        epsilon_det = tf.ones(shape=tf.shape(self.h_encode), dtype=self.dtype) * .5
+        one = np.ones(shape=self.latent_dim, dtype=np.float32)
+        print("z_ones:{}".format(one.shape))
+        epsilon_stoc = tf.distributions.Uniform(low=one * 0, high=one).sample(
+            sample_shape=[self.batch_size_tensor])
+        return tf.cond(self.stochastic, lambda: epsilon_stoc, lambda: epsilon_det)
