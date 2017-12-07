@@ -165,17 +165,16 @@ class StochasticGenerativeHashing(object):
         U = para_list['decode/w_decode:0']
         shift = para_list['scale/shift_para:0']
         scale = para_list['scale/scale_para:0']
-        epsilon = 0.5
 
         # Test Querries
         test_logits = np.dot(np.array(self.test_queries), W) + b
-        h_test = self.binarize(epsilon, test_logits)
-        print("h_test:{}".format(h_test[0]))
+        y_test = self.binarize(logits=test_logits)
+        print("y_test:{}".format(y_test[0]))
 
         # Train
         train_logits = np.dot(np.array(self.train_x), W) + b
-        h_train = self.binarize(epsilon=epsilon, logits=train_logits)
-        print("h_train:{}".format(h_train[0]))
+        y_train = self.binarize(logits=train_logits)
+        print("y_train:{}".format(y_train[0]))
 
         test_xhat, test_recon_loss, test_cost = self.session.run([self.x_recon, self.x_recon_loss, self.cost],
                                                                  feed_dict={self.x: self.test_x,
@@ -196,21 +195,22 @@ class StochasticGenerativeHashing(object):
 
         filename = 'results/' + self.model_results + str(self.latent_dim) + 'bit.mat'
         sio.savemat(filename,
-                    {'h_train': h_train, 'h_test': h_test, 'train_time': end_time,
+                    {'y_train': y_train, 'y_test': y_test, 'train_time': end_time,
                      'W_encode': W, 'b_encode': b, 'U': U,
                      'shift': shift, 'scale': scale,
                      'train_cost': self.train_cost, 'test_recon': test_recon_loss,
                      'test_cost': test_cost})  # define doubly stochastic neuron with gradient by DeFun
 
         plot_cost(self.train_cost)
-        recall_n(test_data=h_test, train_data=h_train)
         plot_recon(template=template)
+        recall_n(test_data=y_test, train_data=y_train)
 
     @staticmethod
-    def binarize(epsilon, logits):
+    def binarize(logits):
+        epsilon = 0.5
         pres = 1.0 / (1 + np.exp(-logits))
-        h_test = (np.sign(pres - epsilon) + 1.0) / 2.0
-        return h_test
+        y_out = (np.sign(pres - epsilon) + 1.0) / 2.0
+        return y_out
 
     @staticmethod
     def show_all_variables():
