@@ -77,15 +77,16 @@ def recall_n(test_data, train_data, hamming_neighbors=1000):
         test_recall.append(recall_idx)
     test_recall = np.array(test_recall)
 
-    plot_recall(hamming_neighbors, np.mean(test_recall, axis=0))
-    return test_recall
+    mean_recall = np.mean(test_recall, axis=0)
+    plot_recall(hamming_neighbors, mean_recall)
+    return mean_recall
 
 
-def plot_recall(hamming_neighbors, test_recall):
-    print("test_recall:{}".format(test_recall.shape))
-    np.save('results/test_recall', test_recall)
+def plot_recall(hamming_neighbors, mean_recall):
+    print("test_recall:{}".format(mean_recall.shape))
+    np.save('results/test_recall', mean_recall)
     plt.figure()
-    plt.plot(np.arange(hamming_neighbors), test_recall)
+    plt.plot(np.arange(hamming_neighbors), mean_recall)
     plt.xlabel('Number of retrieved items', fontsize=fontsize)
     plt.ylabel('Recall', fontsize=fontsize)
     plt.savefig('results/recall')
