@@ -3,6 +3,7 @@ import logging
 import tensorflow as tf
 
 from models.stochastic_generative_hashing import StochasticGenerativeHashing
+from utils.quantization import DoublySN
 
 
 class BinaryAEHashing(StochasticGenerativeHashing):
@@ -21,10 +22,10 @@ class BinaryAEHashing(StochasticGenerativeHashing):
         logging.debug("num batches:{}, batch_size:{} epochs:{}".format(self.num_batches, self.batch_size,
                                                                        int(self.num_iterations / self.num_batches)))
         self.x_recon_loss = tf.losses.mean_squared_error(predictions=self.x_recon, labels=self.x)
-        cross_entropy_loss = tf.reduce_mean(-tf.log())
+        z_recon_loss = tf.losses.mean_squared_error(predictions=self.p_out, labels=self.y_out)
         w_decode_reg = self.l2_reg * tf.nn.l2_loss(self.w_decode) / self.batch_size
         w_encode_reg = self.l2_reg * tf.nn.l2_loss(self.w_encode) / self.batch_size
-        self.cost = self.x_recon_loss + self.alpha * cross_entropy_loss + w_decode_reg + w_encode_reg
+        self.cost = self.x_recon_loss + self.alpha * z_recon_loss + w_decode_reg + w_encode_reg
 
         optimizer = tf.train.AdamOptimizer(self.learning_rate)
         self.optimize = optimizer.minimize(self.cost)
@@ -49,5 +50,5 @@ class BinaryAEHashing(StochasticGenerativeHashing):
             b_encode = tf.Variable(tf.random_normal([self.latent_dim], dtype=self.dtype), name='b_encode')
             self.h_encode = tf.matmul(self.x, self.w_encode) + b_encode
             # determinastic output
-        self.y_out, self.pout = compressive_binarize(logits=self.h_encode, latent_dim=self.latent_dim,
-                                                     batch_size=self.batch_size)
+        h_epsilon = tf.ones(shape=tf.shape(self.h_encode), dtype=self.dtype) * .5
+        self.y_out, self.pout = DoublySN(logits=self.h_encode, epsilon=h_epsilon)

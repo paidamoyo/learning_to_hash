@@ -6,12 +6,19 @@ import numpy as np
 import scipy.io as sio
 
 from flags_parameters import set_params
+from  models.binary_ae_hashing import BinaryAEHashing
 from  models.stochastic_generative_hashing import StochasticGenerativeHashing
 from utils.metrics import euclidean_distance
 
 if __name__ == '__main__':
     GPUID = "0"
     os.environ['CUDA_VISIBLE_DEVICES'] = str(GPUID)
+
+    train_sgh = True
+    if train_sgh:
+        model = StochasticGenerativeHashing
+    else:
+        model = BinaryAEHashing
 
     flags = set_params()
     FLAGS = flags.FLAGS
@@ -40,17 +47,17 @@ if __name__ == '__main__':
         test_queries = test_x
     print("test_x:{}, train_x:{}, test_queries:{}".format(test_x.shape, train_x.shape, test_queries.shape))
 
-    sgh = StochasticGenerativeHashing(batch_size=FLAGS.batch_size,
-                                      learning_rate=FLAGS.learning_rate,
-                                      beta1=FLAGS.beta1,
-                                      beta2=FLAGS.beta2,
-                                      num_iterations=FLAGS.num_iterations, seed=FLAGS.seed,
-                                      l2_reg=FLAGS.l2_reg,
-                                      input_dim=train_x.shape[1],
-                                      num_examples=train_x.shape[0],
-                                      latent_dim=FLAGS.latent_dim,
-                                      train_x=train_x, test_x=test_x,
-                                      alpha=FLAGS.alpha, test_queries=test_queries)
+    hash = model(batch_size=FLAGS.batch_size,
+                 learning_rate=FLAGS.learning_rate,
+                 beta1=FLAGS.beta1,
+                 beta2=FLAGS.beta2,
+                 num_iterations=FLAGS.num_iterations, seed=FLAGS.seed,
+                 l2_reg=FLAGS.l2_reg,
+                 input_dim=train_x.shape[1],
+                 num_examples=train_x.shape[0],
+                 latent_dim=FLAGS.latent_dim,
+                 train_x=train_x, test_x=test_x,
+                 alpha=FLAGS.alpha, test_queries=test_queries)
 
-    with sgh.session:
-        sgh.train_test()
+    with hash.session:
+        hash.train_test()

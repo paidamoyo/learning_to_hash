@@ -9,7 +9,7 @@ import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
 from utils.metrics import plot_cost, recall_n, plot_recon
-from utils.quantization import DoublySN
+from utils.quantization import stochastic_neuron
 
 
 class StochasticGenerativeHashing(object):
@@ -104,7 +104,9 @@ class StochasticGenerativeHashing(object):
             self.h_encode = tf.matmul(self.x, self.w_encode) + b_encode
             # determinastic output
             h_epsilon = tf.ones(shape=tf.shape(self.h_encode), dtype=self.dtype) * .5
-        self.y_out, self.pout = DoublySN(self.h_encode, h_epsilon)
+        # self.y_out, self.p_out = DoublySN(self.h_encode, h_epsilon)
+        self.y_out, self.p_out = stochastic_neuron(logits=self.h_encode, latent_dim=self.latent_dim,
+                                                   batch_size=self.batch_size)
 
     def train_neural_network(self):
         train_print = "Training {} Model:".format(self.model_results)
