@@ -50,12 +50,12 @@ def plot_cost(cost):
     return
 
 
-def recall_n(test_data, train_data, hamming_neighbors=1000):
+def recall_n(test_data, train_data, data, hamming_neighbors=1000):
     # Ground Truth as each querry's K =10  Euclidian nearest neighbours
     # recall at first N hamming neighbours =
     #   fraction of retrieved true nearest neighbours/ total number of true nearest neighbours
     print("test_data:{}, train_data:{}".format(test_data.shape, train_data.shape))
-    test_l2_nn = np.load("results/test_l2_nn.npy")
+    test_l2_nn = np.load("results/test_l2_nn_{}.npy".format(data))
     test_recall = []
     for idx, test_i in enumerate(test_data):
         # Hamming distance
@@ -96,16 +96,17 @@ def plot_recall(hamming_neighbors, mean_recall):
 def plot_compare_recall(baeh, sgh, bits):
     hamming_neighbors = len(baeh)
     plt.figure()
-    plt.plot(np.arange(hamming_neighbors), baeh, label='BAEH')
-    plt.plot(np.arange(hamming_neighbors), sgh, label='SGH')
+    plt.plot(np.arange(hamming_neighbors), baeh, label='BAEH', linewidth=4)
+    plt.plot(np.arange(hamming_neighbors), sgh, label='SGH', linewidth=4)
     plt.legend(loc='best', fontsize=10)
-    plt.xlabel('Number of retrieved items', fontsize=fontsize)
+    plt.xlabel('N (Number of retrieved items)', fontsize=fontsize)
     plt.ylabel('Recall', fontsize=fontsize)
+    plt.title('{}-bit'.format(bits), fontsize=title_fontsize)
     plt.savefig('results/recall_compare_{}bit'.format(bits))
     return
 
 
-def euclidean_distance(test_data, train_data, nearest_neighbors=10):
+def euclidean_distance(test_data, train_data, data, nearest_neighbors=10):
     print("train:{}, test:{}".format(train_data.shape, test_data.shape))
     test_ranked_l2 = []
     for idx, test_i in enumerate(test_data):
@@ -115,7 +116,7 @@ def euclidean_distance(test_data, train_data, nearest_neighbors=10):
         test_ranked_l2.append(k_nn)
         if idx % 100 == 0:
             print("iteration:{}, knn:{}, dist:{}".format(idx, len(k_nn), dist))
-    np.save("results/test_l2_nn", test_ranked_l2)
+    np.save("results/test_l2_nn_{}".format(data), test_ranked_l2)
     return test_ranked_l2
 
 
@@ -123,7 +124,7 @@ def plot_recon(template):
     # plt.figure(figsize=(60, 60))
     plt.figure()
     # plt.imshow(template, cmap=mpl.cm.Greys)
-    plt.imshow(template)
+    plt.imshow(template, alpha=4)
     plt.axis('off')
     plt.grid('off')
     plt.savefig("results/reconstructed_images")

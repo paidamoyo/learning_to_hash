@@ -3,9 +3,9 @@ import pprint
 import sys
 
 import numpy as np
-import scipy.io as sio
 
 from flags_parameters import set_params
+from generate_data import generate
 from  models.binary_ae_hashing import BinaryAEHashing
 from  models.stochastic_generative_hashing import StochasticGenerativeHashing
 from utils.metrics import euclidean_distance
@@ -14,7 +14,7 @@ if __name__ == '__main__':
     GPUID = "0"
     os.environ['CUDA_VISIBLE_DEVICES'] = str(GPUID)
 
-    train_sgh = True
+    train_sgh = False
     if train_sgh:
         model = StochasticGenerativeHashing
     else:
@@ -34,15 +34,14 @@ if __name__ == '__main__':
         vm = 1.0
     print("gpu_memory_fraction:{}".format(vm))
 
-    train_data = sio.loadmat('dataset/mnist_training.mat')
-    train_x = train_data['Xtraining']
-
-    test_data = sio.loadmat('dataset/mnist_test.mat')
-    test_x = test_data['Xtest']
-    if FLAGS.queries != test_x.shape[0]:
+    data_name = 'cifar'
+    data = generate(data=data_name)
+    test_x, train_x = data['test_x'], data['train_x']
+    euclidean = False
+    if FLAGS.queries != test_x.shape[0] or euclidean:
         queries_idx = np.random.choice(np.arange(test_x.shape[0]), size=FLAGS.queries)
         test_queries = test_x[queries_idx]
-        euclidean_distance(test_data=test_queries, train_data=train_x)
+        euclidean_distance(test_data=test_queries, train_data=train_x, data=data)
     else:
         test_queries = test_x
     print("test_x:{}, train_x:{}, test_queries:{}".format(test_x.shape, train_x.shape, test_queries.shape))
@@ -57,7 +56,7 @@ if __name__ == '__main__':
                  num_examples=train_x.shape[0],
                  latent_dim=FLAGS.latent_dim,
                  train_x=train_x, test_x=test_x,
-                 alpha=FLAGS.alpha, test_queries=test_queries)
+                 alpha=FLAGS.alpha, test_queries=test_queries, data=data_name)
 
     with hash.session:
         hash.train_test()

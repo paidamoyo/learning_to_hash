@@ -7,13 +7,13 @@ from models.stochastic_generative_hashing import StochasticGenerativeHashing
 
 class BinaryAEHashing(StochasticGenerativeHashing):
     def __init__(self, alpha, l2_reg, batch_size, latent_dim, seed, num_iterations, learning_rate, beta1, beta2,
-                 train_x, test_x, test_queries, input_dim, num_examples):
+                 train_x, test_x, test_queries, input_dim, num_examples, data):
         StochasticGenerativeHashing.__init__(self, alpha, l2_reg, batch_size, latent_dim, seed, num_iterations,
                                              learning_rate, beta1, beta2, train_x, test_x, test_queries, input_dim,
-                                             num_examples)
+                                             num_examples, data)
 
         self.log_file = 'binary_hashing.log'
-        self.model_results = 'BAEH_mnsit_'
+        self.model_results = 'BAEH_{}_'.format(data)
         self.is_stochastic = False
 
     def _objective(self):
