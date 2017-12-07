@@ -14,7 +14,7 @@ class BinaryAEHashing(StochasticGenerativeHashing):
 
         self.log_file = 'binary_hashing.log'
         self.model_results = 'BAEH_mnsit_'
-        self.stochastic = False
+        self.is_stochastic = True
 
     def _objective(self):
         self._build_model()

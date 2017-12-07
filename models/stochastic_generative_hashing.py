@@ -28,7 +28,7 @@ class StochasticGenerativeHashing(object):
         np.random.seed(seed)
         tf.set_random_seed(seed)
         self.batch_norm = True
-        self.stochastic = True
+        self.is_stochastic = False
 
         self.config = tf.ConfigProto(log_device_placement=False, allow_soft_placement=True)
         self.config.gpu_options.allow_growth = True
@@ -57,6 +57,7 @@ class StochasticGenerativeHashing(object):
         with self.G.as_default():
             self.x = tf.placeholder(self.dtype, shape=[None, self.input_dim], name='x')
             self.batch_size_tensor = tf.placeholder(tf.int32, shape=[], name='batch_size')
+            self.stochastic = tf.placeholder(tf.bool)
             self._objective()
             self.session = tf.Session(config=self.config)
 
@@ -112,7 +113,7 @@ class StochasticGenerativeHashing(object):
                        " momentum: beta1={} beta2={}, batch_size:{}, batch_norm:{}," \
                        "latent_dim:{}, num_of_batches:{}, stochastic:{}" \
             .format(self.l2_reg, self.learning_rate, self.beta1, self.beta2, self.batch_size,
-                    self.batch_norm, self.latent_dim, self.num_batches, self.stochastic)
+                    self.batch_norm, self.latent_dim, self.num_batches, self.is_stochastic)
         print(train_print)
         print(params_print)
         logging.debug(train_print)
@@ -130,7 +131,8 @@ class StochasticGenerativeHashing(object):
             # Ending time.
             _, x_recon_loss, batch_cost = self.session.run([self.optimize, self.x_recon_loss, self.cost],
                                                            feed_dict={self.x: x_batch,
-                                                                      self.batch_size_tensor: self.batch_size})
+                                                                      self.batch_size_tensor: self.batch_size,
+                                                                      self.stochastic: self.is_stochastic})
 
             if i % 100 == 0:
                 print_iteration = 'Num iteration: %d Total Loss: %0.04f Recon Loss %0.04f' % (
@@ -178,7 +180,8 @@ class StochasticGenerativeHashing(object):
         test_xhat, test_recon_loss, test_cost = self.session.run([self.x_recon, self.x_recon_loss, self.cost],
                                                                  feed_dict={self.x: self.test_x,
                                                                             self.batch_size_tensor: self.test_x.shape[
-                                                                                0]})
+                                                                                0],
+                                                                            self.stochastic: self.is_stochastic})
         size = 30
 
         template = np.hstack([np.vstack([self.test_x[j].reshape(28, 28), test_xhat[j].reshape(28, 28)
@@ -187,7 +190,8 @@ class StochasticGenerativeHashing(object):
         train_xhat, train_recon_loss, train_cost = self.session.run([self.x_recon, self.x_recon_loss, self.cost],
                                                                     feed_dict={self.x: self.train_x,
                                                                                self.batch_size_tensor:
-                                                                                   self.train_x.shape[0]})
+                                                                                   self.train_x.shape[0],
+                                                                               self.stochastic: self.is_stochastic})
 
         print_cost = "Train: recon:{}, cost:{}, Test: recon:{}, cost:{}".format(train_recon_loss, train_cost,
                                                                                 test_recon_loss, test_cost)
