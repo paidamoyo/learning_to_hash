@@ -104,7 +104,12 @@ class StochasticGenerativeHashing(object):
             b_encode = tf.Variable(tf.random_normal([self.latent_dim], dtype=self.dtype), name='b_encode')
             self.h_encode = tf.matmul(self.x, self.w_encode) + b_encode
             # determinastic output
-            h_epsilon = tf.ones(shape=tf.shape(self.h_encode), dtype=self.dtype) * .5
+            # h_epsilon = tf.ones(shape=tf.shape(self.h_encode), dtype=self.dtype) * .5
+            # stochastic output
+            one = np.ones(shape=self.latent_dim, dtype=np.float32)
+            print("z_ones:{}".format(one.shape))
+            h_epsilon = tf.distributions.Uniform(low=-one * 0.5, high=one * 0.5).sample(
+                sample_shape=[self.batch_size_tensor])
         self.y_out, self.p_out = doubly_SN(self.h_encode, h_epsilon)
 
     def train_neural_network(self):
