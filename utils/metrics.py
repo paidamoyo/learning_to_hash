@@ -43,7 +43,7 @@ label_fontsize = 12
 
 
 def plot_cost(cost):
-    plt.plot(np.array(range(len(cost))) * 100, np.array(cost) / 500)
+    plt.plot(np.array(range(len(cost))) * 100, np.array(cost))
     plt.xlabel('Iteration', fontsize=fontsize)
     plt.ylabel('Total Cost', fontsize=fontsize)
     plt.savefig('results/cost')
