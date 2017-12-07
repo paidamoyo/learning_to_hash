@@ -55,6 +55,7 @@ class StochasticGenerativeHashing(object):
         self.G = tf.Graph()
         with self.G.as_default():
             self.x = tf.placeholder(self.dtype, shape=[None, self.input_dim], name='x')
+            self.batch_size_tensor = tf.placeholder(tf.int32, shape=[], name='batch_size')
             self._objective()
             self.session = tf.Session(config=self.config)
 
@@ -106,7 +107,7 @@ class StochasticGenerativeHashing(object):
             h_epsilon = tf.ones(shape=tf.shape(self.h_encode), dtype=self.dtype) * .5
         # self.y_out, self.p_out = DoublySN(self.h_encode, h_epsilon)
         self.y_out, self.p_out = stochastic_neuron(logits=self.h_encode, latent_dim=self.latent_dim,
-                                                   batch_size=self.batch_size)
+                                                   batch_size_tensor=self.batch_size_tensor)
 
     def train_neural_network(self):
         train_print = "Training {} Model:".format(self.model_results)
@@ -131,7 +132,8 @@ class StochasticGenerativeHashing(object):
             x_batch = self.train_x[indx]
             # Ending time.
             _, x_recon_loss, batch_cost = self.session.run([self.optimize, self.x_recon_loss, self.cost],
-                                                           feed_dict={self.x: x_batch})
+                                                           feed_dict={self.x: x_batch,
+                                                                      self.batch_size_tensor: self.batch_size})
 
             if i % 100 == 0:
                 print_iteration = 'Num iteration: %d Total Loss: %0.04f Recon Loss %0.04f' % (
@@ -178,13 +180,17 @@ class StochasticGenerativeHashing(object):
         print("h_train:{}".format(h_train[0]))
 
         test_xhat, test_recon_loss, test_cost = self.session.run([self.x_recon, self.x_recon_loss, self.cost],
-                                                                 feed_dict={self.x: self.test_x})
+                                                                 feed_dict={self.x: self.test_x,
+                                                                            self.batch_size_tensor: self.test_x.shape[
+                                                                                0]})
 
         template = np.hstack([np.vstack([self.test_x[j].reshape(28, 28), test_xhat[j].reshape(28, 28)
                                          ]) for j in range(30)])
 
         train_xhat, train_recon_loss, train_cost = self.session.run([self.x_recon, self.x_recon_loss, self.cost],
-                                                                    feed_dict={self.x: self.train_x})
+                                                                    feed_dict={self.x: self.train_x,
+                                                                               self.batch_size_tensor:
+                                                                                   self.train_x.shape[0]})
 
         logging.debug(
             "Train: recon:{}, cost:{}, Test: recon:{}, cost:{}".format(train_recon_loss, train_cost, test_recon_loss,

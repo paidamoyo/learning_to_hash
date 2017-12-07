@@ -33,6 +33,7 @@ if __name__ == '__main__':
     else:
         vm = 1.0
     print("gpu_memory_fraction:{}".format(vm))
+    cifar_meta =
 
     train_data = sio.loadmat('dataset/mnist_training.mat')
     train_x = train_data['Xtraining']

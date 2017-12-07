@@ -25,9 +25,9 @@ def DoublySN(logits, epsilon):
     return yout, prob
 
 
-def stochastic_neuron(logits, latent_dim, batch_size):
+def stochastic_neuron(logits, latent_dim, batch_size_tensor):
     prob = tf.sigmoid(logits)
     ones = np.ones(shape=latent_dim, dtype=np.float32)
-    epsilon = tf.distributions.Uniform(low=ones * 0, high=ones).sample(sample_shape=[batch_size])
+    epsilon = tf.distributions.Uniform(low=ones * 0, high=ones).sample(sample_shape=[batch_size_tensor])
     y_out = (tf.sign(prob - epsilon) + 1.0) / 2
     return y_out, prob
