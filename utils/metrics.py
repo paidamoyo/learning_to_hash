@@ -93,6 +93,18 @@ def plot_recall(hamming_neighbors, mean_recall):
     return
 
 
+def plot_compare_recall(baeh, sgh, bits):
+    hamming_neighbors = len(baeh)
+    plt.figure()
+    plt.plot(np.arange(hamming_neighbors), baeh, label='BAEH')
+    plt.plot(np.arange(hamming_neighbors), sgh, label='SGH')
+    plt.legend(loc='best', fontsize=10)
+    plt.xlabel('Number of retrieved items', fontsize=fontsize)
+    plt.ylabel('Recall', fontsize=fontsize)
+    plt.savefig('results/recall_compare_{}bit'.format(bits))
+    return
+
+
 def euclidean_distance(test_data, train_data, nearest_neighbors=10):
     print("train:{}, test:{}".format(train_data.shape, test_data.shape))
     test_ranked_l2 = []
