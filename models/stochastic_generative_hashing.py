@@ -28,7 +28,7 @@ class StochasticGenerativeHashing(object):
         np.random.seed(seed)
         tf.set_random_seed(seed)
         self.batch_norm = True
-        self.is_stochastic = False
+        self.is_stochastic = True
 
         self.config = tf.ConfigProto(log_device_placement=False, allow_soft_placement=True)
         self.config.gpu_options.allow_growth = True
