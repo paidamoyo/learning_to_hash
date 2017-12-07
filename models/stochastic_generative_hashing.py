@@ -71,7 +71,7 @@ class StochasticGenerativeHashing(object):
                                                                        int(self.num_iterations / self.num_batches)))
         self.x_recon_loss = tf.losses.mean_squared_error(predictions=self.x_recon, labels=self.x)
         cross_entropy_loss = tf.reduce_mean(
-            tf.nn.sigmoid_cross_entropy_with_logits(logits=self.h_encode, labels=self.y_out))
+            tf.nn.sigmoid_cross_entropy_with_logits(logits=self.p_out, labels=self.y_out))
         w_decode_reg = self.l2_reg * tf.nn.l2_loss(self.w_decode) / self.batch_size
         w_encode_reg = self.l2_reg * tf.nn.l2_loss(self.w_encode) / self.batch_size
         self.cost = self.x_recon_loss + self.alpha * cross_entropy_loss + w_decode_reg + w_encode_reg
