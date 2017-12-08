@@ -169,21 +169,16 @@ class StochasticGenerativeHashing(object):
         shift = para_list['scale/shift_para:0']
         scale = para_list['scale/scale_para:0']
 
-        # Test Querries
-        test_logits = np.dot(np.array(self.test_queries), W) + b
-        y_test = self.binarize(logits=test_logits)
-        print("y_test:{}".format(y_test[0]))
+        test_xhat, test_recon_loss, test_cost, y_test = self.session.run(
+            [self.x_recon, self.x_recon_loss, self.cost, self.y_out],
+            feed_dict={self.x: self.test_x,
+                       self.batch_size_tensor: self.test_x.shape[
+                           0],
+                       self.stochastic: self.is_stochastic})
 
-        # Train
-        train_logits = np.dot(np.array(self.train_x), W) + b
-        y_train = self.binarize(logits=train_logits)
-        print("y_train:{}".format(y_train[0]))
-
-        test_xhat, test_recon_loss, test_cost = self.session.run([self.x_recon, self.x_recon_loss, self.cost],
-                                                                 feed_dict={self.x: self.test_x,
-                                                                            self.batch_size_tensor: self.test_x.shape[
-                                                                                0],
-                                                                            self.stochastic: self.is_stochastic})
+        y_train = self.session.run([self.y_out],
+                                   feed_dict={self.x: self.train_x, self.batch_size_tensor: self.test_x.shape[
+                                       0], self.stochastic: self.is_stochastic})
         size = 30
         if self.data == 'mnsit':
             template = np.hstack([np.vstack([reshape_mnsit(j, self.test_x[j]), reshape_mnsit(j, test_xhat)
@@ -217,13 +212,6 @@ class StochasticGenerativeHashing(object):
                      'test_cost': test_cost,
                      'test_recall': test_recall, 'test_x': self.test_x[0: size],
                      'test_xhat': test_xhat[0: size]})  # define doubly stochastic neuron with gradient by DeFun
-
-    @staticmethod
-    def binarize(logits):
-        epsilon = 0.5
-        pres = 1.0 / (1 + np.exp(-logits + 1e-8))
-        y_out = (np.sign(pres - epsilon) + 1.0) / 2.0
-        return y_out
 
     @staticmethod
     def show_all_variables():

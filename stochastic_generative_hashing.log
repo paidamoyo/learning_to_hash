@@ -30,3 +30,27 @@ DEBUG:root:Num iteration: 2300 Total Loss: 4012.3567 Recon Loss 4012.3521
 DEBUG:root:Num iteration: 2400 Total Loss: 4127.8389 Recon Loss 4127.8345
 DEBUG:root:Num iteration: 2500 Total Loss: 3954.1953 Recon Loss 3954.1904
 DEBUG:root:Num iteration: 2600 Total Loss: 4175.7939 Recon Loss 4175.7896
+DEBUG:root:Num iteration: 2700 Total Loss: 4935.8179 Recon Loss 4935.8135
+DEBUG:root:Num iteration: 2800 Total Loss: 4016.3193 Recon Loss 4016.3147
+DEBUG:root:Num iteration: 2900 Total Loss: 3912.1768 Recon Loss 3912.1721
+DEBUG:root:Num iteration: 3000 Total Loss: 3973.9399 Recon Loss 3973.9353
+DEBUG:root:Num iteration: 3100 Total Loss: 4031.4739 Recon Loss 4031.4692
+DEBUG:root:Num iteration: 3200 Total Loss: 3888.4670 Recon Loss 3888.4624
+DEBUG:root:Num iteration: 3300 Total Loss: 3908.7390 Recon Loss 3908.7344
+DEBUG:root:Num iteration: 3400 Total Loss: 4144.4087 Recon Loss 4144.4043
+DEBUG:root:Num iteration: 3500 Total Loss: 4165.2593 Recon Loss 4165.2549
+DEBUG:root:Num iteration: 3600 Total Loss: 4071.8677 Recon Loss 4071.8630
+DEBUG:root:Num iteration: 3700 Total Loss: 4121.6948 Recon Loss 4121.6904
+DEBUG:root:Num iteration: 3800 Total Loss: 4103.2046 Recon Loss 4103.2002
+DEBUG:root:Num iteration: 3900 Total Loss: 3988.7361 Recon Loss 3988.7314
+DEBUG:root:Num iteration: 4000 Total Loss: 4109.6890 Recon Loss 4109.6846
+DEBUG:root:Num iteration: 4100 Total Loss: 3972.5659 Recon Loss 3972.5613
+DEBUG:root:Num iteration: 4200 Total Loss: 4177.0405 Recon Loss 4177.0361
+DEBUG:root:Num iteration: 4300 Total Loss: 3824.8333 Recon Loss 3824.8286
+DEBUG:root:Num iteration: 4400 Total Loss: 4034.2354 Recon Loss 4034.2307
+DEBUG:root:Num iteration: 4500 Total Loss: 4140.8350 Recon Loss 4140.8306
+DEBUG:root:Num iteration: 4600 Total Loss: 4034.8230 Recon Loss 4034.8184
+DEBUG:root:Num iteration: 4700 Total Loss: 4027.1619 Recon Loss 4027.1572
+DEBUG:root:Num iteration: 4800 Total Loss: 3969.2051 Recon Loss 3969.2004
+DEBUG:root:Num iteration: 4900 Total Loss: 4013.4592 Recon Loss 4013.4546
+DEBUG:root:Time usage: 0:08:30
