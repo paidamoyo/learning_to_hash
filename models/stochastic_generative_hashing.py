@@ -176,9 +176,6 @@ class StochasticGenerativeHashing(object):
                            0],
                        self.stochastic: self.is_stochastic})
 
-        y_train = self.session.run([self.y_out],
-                                   feed_dict={self.x: self.train_x, self.batch_size_tensor: self.test_x.shape[
-                                       0], self.stochastic: self.is_stochastic})
         size = 30
         if self.data == 'mnsit':
             template = np.hstack([np.vstack([reshape_mnsit(j, self.test_x[j]), reshape_mnsit(j, test_xhat)
@@ -188,11 +185,12 @@ class StochasticGenerativeHashing(object):
                 [np.vstack([reshape_cifar(j, self.test_x[j]), reshape_cifar(j, test_xhat)
                             ]) for j in range(size)])
 
-        train_xhat, train_recon_loss, train_cost = self.session.run([self.x_recon, self.x_recon_loss, self.cost],
-                                                                    feed_dict={self.x: self.train_x,
-                                                                               self.batch_size_tensor:
-                                                                                   self.train_x.shape[0],
-                                                                               self.stochastic: self.is_stochastic})
+        train_xhat, train_recon_loss, train_cost, y_train = self.session.run(
+            [self.x_recon, self.x_recon_loss, self.cost, self.y_out],
+            feed_dict={self.x: self.train_x,
+                       self.batch_size_tensor:
+                           self.train_x.shape[0],
+                       self.stochastic: self.is_stochastic})
 
         print_cost = "Train: recon:{}, cost:{}, Test: recon:{}, cost:{}".format(train_recon_loss, train_cost,
                                                                                 test_recon_loss, test_cost)
