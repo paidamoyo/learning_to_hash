@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.io as sio
 
+from utils.generate_data import reshape_cifar, reshape_mnsit
 from utils.metrics import plot_compare_recall, plot_recon
 
 
@@ -17,17 +18,26 @@ def compare_templates():
     test_x = np.squeeze(baeh['test_x'])
     baeh_xhat = np.squeeze(baeh['test_xhat'])
     sgh_xhat = np.squeeze(sgh['test_xhat'])
-    template = np.hstack(
-        [np.vstack([test_x[j].reshape(28, 28), baeh_xhat[j].reshape(28, 28), sgh_xhat[j].reshape(28, 28)
-                    ]) for j in range(size)])
+
+    if data == 'mnsit':
+        template = np.hstack(
+            [np.vstack([reshape_mnsit(j, test_x), reshape_mnsit(j, baeh_xhat), reshape_mnsit(j, sgh_xhat)
+                        ]) for j in range(size)])
+    else:
+        template = np.hstack(
+            [np.vstack([reshape_cifar(j, test_x),
+                        reshape_cifar(j, baeh_xhat),
+                        reshape_cifar(j, sgh_xhat)
+                        ]) for j in range(size)])
 
     plot_recon(template=template)
     return
 
 
 if __name__ == '__main__':
+    data = 'mnsit'
     bits = '8'
-    baeh = sio.loadmat('results/BAEH_mnsit_{}bit.mat'.format(bits))
-    sgh = sio.loadmat('results/SGH_mnsit_{}bit.mat'.format(bits))
+    baeh = sio.loadmat('results/BAEH_{}_{}bit.mat'.format(data, bits))
+    sgh = sio.loadmat('results/SGH_{}_{}bit.mat'.format(data, bits))
     compare_recall()
     compare_templates()

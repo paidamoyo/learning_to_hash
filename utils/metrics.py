@@ -124,7 +124,7 @@ def plot_recon(template):
     # plt.figure(figsize=(60, 60))
     plt.figure()
     # plt.imshow(template, cmap=mpl.cm.Greys)
-    plt.imshow(template, alpha=4)
+    plt.imshow(template)
     plt.axis('off')
     plt.grid('off')
     plt.savefig("results/reconstructed_images")

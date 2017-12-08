@@ -8,6 +8,7 @@ import scipy.io as sio
 import tensorflow as tf
 import tensorflow.contrib.slim as slim
 
+from utils.generate_data import reshape_mnsit, reshape_cifar
 from utils.metrics import plot_cost, recall_n, plot_recon
 from utils.quantization import doubly_SN
 
@@ -184,9 +185,13 @@ class StochasticGenerativeHashing(object):
                                                                                 0],
                                                                             self.stochastic: self.is_stochastic})
         size = 30
-
-        template = np.hstack([np.vstack([self.test_x[j].reshape(28, 28), test_xhat[j].reshape(28, 28)
-                                         ]) for j in range(size)])
+        if self.data == 'mnsit':
+            template = np.hstack([np.vstack([reshape_mnsit(j, self.test_x[j]), reshape_mnsit(j, test_xhat)
+                                             ]) for j in range(size)])
+        else:
+            template = np.hstack(
+                [np.vstack([reshape_cifar(j, self.test_x[j]), reshape_cifar(j, test_xhat)
+                            ]) for j in range(size)])
 
         train_xhat, train_recon_loss, train_cost = self.session.run([self.x_recon, self.x_recon_loss, self.cost],
                                                                     feed_dict={self.x: self.train_x,

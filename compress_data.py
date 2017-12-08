@@ -5,9 +5,9 @@ import sys
 import numpy as np
 
 from flags_parameters import set_params
-from generate_data import generate
 from  models.binary_ae_hashing import BinaryAEHashing
 from  models.stochastic_generative_hashing import StochasticGenerativeHashing
+from utils.generate_data import generate
 from utils.metrics import euclidean_distance
 
 if __name__ == '__main__':
@@ -35,15 +35,18 @@ if __name__ == '__main__':
     print("gpu_memory_fraction:{}".format(vm))
 
     data_name = 'cifar'
-    data = generate(data=data_name)
-    test_x, train_x = data['test_x'], data['train_x']
-    euclidean = False
-    if FLAGS.queries != test_x.shape[0] or euclidean:
+    all_data = generate(data=data_name)
+    test_x, train_x = all_data['test_x'], all_data['train_x']
+    compute_nn = False
+    if compute_nn:
         queries_idx = np.random.choice(np.arange(test_x.shape[0]), size=FLAGS.queries)
         test_queries = test_x[queries_idx]
-        euclidean_distance(test_data=test_queries, train_data=train_x, data=data)
-    else:
+        np.save('results/test_queries_{}'.format(data_name), test_queries)
+        euclidean_distance(test_data=test_queries, train_data=train_x, data=data_name)
+    elif data_name == 'mnsit':
         test_queries = test_x
+    elif data_name == 'cifar':
+        test_queries = np.load("results/test_queries_{}.npy".format(data_name))
     print("test_x:{}, train_x:{}, test_queries:{}".format(test_x.shape, train_x.shape, test_queries.shape))
 
     hash = model(batch_size=FLAGS.batch_size,
