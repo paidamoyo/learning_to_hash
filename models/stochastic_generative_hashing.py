@@ -25,7 +25,7 @@ class StochasticGenerativeHashing(object):
         self.learning_rate, self.beta1, self.beta2 = learning_rate, beta1, beta2
         self.log_file = 'stochastic_generative_hashing.log'
         self.data = data
-        self.model_results = 'SGH_{}'.format(self.data)
+        self.model_results = 'SGH_{}_'.format(self.data)
         logging.basicConfig(filename=self.log_file, filemode='w', level=logging.DEBUG)
         np.random.seed(seed)
         tf.set_random_seed(seed)

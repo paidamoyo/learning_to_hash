@@ -21,8 +21,14 @@ def generate(data):
         test_data = sio.loadmat(cifar + 'test_batch.mat')
         test_x = test_data['data']
         print("test_x:{}, train_x:{}".format(test_x.shape, train_x.shape))
-        data = {'test_x': test_x, 'train_x': train_x}
+        data = {
+            'test_x': transpose_reshape(test_x),
+            'train_x': transpose_reshape(train_x)}
         return data
+
+
+def transpose_reshape(x_data):
+    return x_data.reshape(x_data.shape[0], 3, 32, 32).transpose(0, 2, 3, 1).reshape(x_data.shape[0], 3072)
 
 
 def get_batch(cifar, number):
@@ -33,7 +39,8 @@ def get_batch(cifar, number):
 
 
 def reshape_cifar(j, test_x):
-    return test_x[j].reshape(3, 32, 32).transpose(1, 2, 0)
+    # return test_x[j].reshape(3, 32, 32).transpose(1, 2, 0)
+    return test_x[j].reshape(32, 32, 3)
 
 
 def reshape_mnsit(j, test_x):

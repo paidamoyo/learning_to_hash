@@ -14,7 +14,7 @@ if __name__ == '__main__':
     GPUID = "0"
     os.environ['CUDA_VISIBLE_DEVICES'] = str(GPUID)
 
-    train_sgh = True
+    train_sgh = False
     if train_sgh:
         model = StochasticGenerativeHashing
     else:

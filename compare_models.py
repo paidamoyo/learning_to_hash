@@ -35,8 +35,8 @@ def compare_templates():
 
 
 if __name__ == '__main__':
-    data = 'mnsit'
-    bits = '8'
+    data = 'cifar'
+    bits = '64'
     baeh = sio.loadmat('results/BAEH_{}_{}bit.mat'.format(data, bits))
     sgh = sio.loadmat('results/SGH_{}_{}bit.mat'.format(data, bits))
     compare_recall()
