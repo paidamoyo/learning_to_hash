@@ -1,5 +1,58 @@
 DEBUG:root:train_mean:[ 130.71074  130.14036  131.05044 ...,  113.83058  113.90624  114.38186], train_var:[ 5389.34218866  5247.82393907  5218.59209581 ...,  4211.22527686
   4252.60736906  4366.15216294]
-DEBUG:root:num batches:100.0, batch_size:500 epochs:0
+DEBUG:root:num batches:100.0, batch_size:500 epochs:50
 DEBUG:root:Training SGH_cifar Model:
-DEBUG:root:Parameters:, l2_reg:0.001, learning_rate:0.01, momentum: beta1=0.9 beta2=0.999, batch_size:500, batch_norm:True,latent_dim:64, num_of_batches:100.0, stochastic:True, data:cifar
+DEBUG:root:Parameters:, l2_reg:1, learning_rate:0.01, momentum: beta1=0.9 beta2=0.999, batch_size:500, batch_norm:True,latent_dim:64, num_of_batches:100.0, stochastic:True, data:cifar
+DEBUG:root:Num iteration: 0 Total Loss: 8198722.0000 Recon Loss 8198721.5000
+DEBUG:root:Num iteration: 100 Total Loss: 4001.8740 Recon Loss 4001.2166
+DEBUG:root:Num iteration: 200 Total Loss: 4056.1401 Recon Loss 4055.4827
+DEBUG:root:Num iteration: 300 Total Loss: 3904.3315 Recon Loss 3903.6741
+DEBUG:root:Num iteration: 400 Total Loss: 3961.5945 Recon Loss 3960.9370
+DEBUG:root:Num iteration: 500 Total Loss: 4166.3809 Recon Loss 4165.7231
+DEBUG:root:Num iteration: 600 Total Loss: 4039.6008 Recon Loss 4038.9434
+DEBUG:root:Num iteration: 700 Total Loss: 3895.5332 Recon Loss 3894.8757
+DEBUG:root:Num iteration: 800 Total Loss: 4019.4656 Recon Loss 4018.8081
+DEBUG:root:Num iteration: 900 Total Loss: 4010.5034 Recon Loss 4009.8459
+DEBUG:root:Num iteration: 1000 Total Loss: 3861.5488 Recon Loss 3860.8914
+DEBUG:root:Num iteration: 1100 Total Loss: 3983.5872 Recon Loss 3982.9297
+DEBUG:root:Num iteration: 1200 Total Loss: 4047.8965 Recon Loss 4047.2390
+DEBUG:root:Num iteration: 1300 Total Loss: 3931.5005 Recon Loss 3930.8430
+DEBUG:root:Num iteration: 1400 Total Loss: 3972.2078 Recon Loss 3971.5503
+DEBUG:root:Num iteration: 1500 Total Loss: 4059.6748 Recon Loss 4059.0173
+DEBUG:root:Num iteration: 1600 Total Loss: 3988.6909 Recon Loss 3988.0334
+DEBUG:root:Num iteration: 1700 Total Loss: 4119.0303 Recon Loss 4118.3726
+DEBUG:root:Num iteration: 1800 Total Loss: 4057.4329 Recon Loss 4056.7754
+DEBUG:root:Num iteration: 1900 Total Loss: 4020.8726 Recon Loss 4020.2151
+DEBUG:root:Num iteration: 2000 Total Loss: 4163.6016 Recon Loss 4162.9438
+DEBUG:root:Num iteration: 2100 Total Loss: 4089.8694 Recon Loss 4089.2119
+DEBUG:root:Num iteration: 2200 Total Loss: 4149.4526 Recon Loss 4148.7949
+DEBUG:root:Num iteration: 2300 Total Loss: 4071.2261 Recon Loss 4070.5686
+DEBUG:root:Num iteration: 2400 Total Loss: 4167.4956 Recon Loss 4166.8379
+DEBUG:root:Num iteration: 2500 Total Loss: 3995.4421 Recon Loss 3994.7847
+DEBUG:root:Num iteration: 2600 Total Loss: 4281.1104 Recon Loss 4280.4526
+DEBUG:root:Num iteration: 2700 Total Loss: 3957.1499 Recon Loss 3956.4924
+DEBUG:root:Num iteration: 2800 Total Loss: 4062.2151 Recon Loss 4061.5576
+DEBUG:root:Num iteration: 2900 Total Loss: 3966.8962 Recon Loss 3966.2388
+DEBUG:root:Num iteration: 3000 Total Loss: 4055.7708 Recon Loss 4055.1133
+DEBUG:root:Num iteration: 3100 Total Loss: 4105.1499 Recon Loss 4104.4922
+DEBUG:root:Num iteration: 3200 Total Loss: 3980.5510 Recon Loss 3979.8936
+DEBUG:root:Num iteration: 3300 Total Loss: 4018.3208 Recon Loss 4017.6633
+DEBUG:root:Num iteration: 3400 Total Loss: 4256.4097 Recon Loss 4255.7520
+DEBUG:root:Num iteration: 3500 Total Loss: 4237.5854 Recon Loss 4236.9277
+DEBUG:root:Num iteration: 3600 Total Loss: 4134.9160 Recon Loss 4134.2583
+DEBUG:root:Num iteration: 3700 Total Loss: 4173.0190 Recon Loss 4172.3613
+DEBUG:root:Num iteration: 3800 Total Loss: 4216.0376 Recon Loss 4215.3799
+DEBUG:root:Num iteration: 3900 Total Loss: 4024.9502 Recon Loss 4024.2927
+DEBUG:root:Num iteration: 4000 Total Loss: 4219.1875 Recon Loss 4218.5298
+DEBUG:root:Num iteration: 4100 Total Loss: 4065.7332 Recon Loss 4065.0757
+DEBUG:root:Num iteration: 4200 Total Loss: 4338.1953 Recon Loss 4337.5376
+DEBUG:root:Num iteration: 4300 Total Loss: 3897.3071 Recon Loss 3896.6497
+DEBUG:root:Num iteration: 4400 Total Loss: 4102.7539 Recon Loss 4102.0962
+DEBUG:root:Num iteration: 4500 Total Loss: 4210.0630 Recon Loss 4209.4053
+DEBUG:root:Num iteration: 4600 Total Loss: 4128.7695 Recon Loss 4128.1118
+DEBUG:root:Num iteration: 4700 Total Loss: 4117.8428 Recon Loss 4117.1851
+DEBUG:root:Num iteration: 4800 Total Loss: 4022.4961 Recon Loss 4021.8386
+DEBUG:root:Num iteration: 4900 Total Loss: 4059.8958 Recon Loss 4059.2383
+DEBUG:root:Time usage: 0:08:16
+INFO:tensorflow:Restoring parameters from /Users/ash-girlchapfuwa/projects/personal/research/lossy_compression/summaries/SGH_cifar
+DEBUG:root:Train: recon:4139.60888671875, cost:4140.2626953125, Test: recon:4160.3359375, cost:4160.99365234375

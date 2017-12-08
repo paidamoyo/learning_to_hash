@@ -131,8 +131,8 @@ class StochasticGenerativeHashing(object):
             indx = np.random.choice(self.input_dim, self.batch_size)
             x_batch = self.train_x[indx]
             # Ending time.
-            summary, _, x_recon_loss, batch_cost = self.session.run(
-                [self.merged, self.optimize, self.x_recon_loss, self.cost],
+            _, x_recon_loss, batch_cost = self.session.run(
+                [self.optimize, self.x_recon_loss, self.cost],
                 feed_dict={self.x: x_batch,
                            self.batch_size_tensor: self.batch_size,
                            self.stochastic: self.is_stochastic})
@@ -142,13 +142,13 @@ class StochasticGenerativeHashing(object):
                     i, batch_cost, x_recon_loss)
                 print(print_iteration)
                 logging.debug(print_iteration)
-                self.train_writer.add_summary(summary, i)
                 self.train_cost.append(batch_cost)
                 self.train_recon.append(x_recon_loss)
 
             if i % 2000 == 0:
                 learning_rate = 0.5 * learning_rate
 
+        self.saver.save(sess=self.session, save_path=self.save_path)
         t_vars = tf.trainable_variables()
 
         para_list = {}
@@ -179,6 +179,11 @@ class StochasticGenerativeHashing(object):
                            0],
                        self.stochastic: self.is_stochastic})
 
+        y_test_queries = self.session.run(
+            self.y_out, feed_dict={self.x: self.test_queries,
+                                   self.batch_size_tensor: self.test_queries.shape[0],
+                                   self.stochastic: self.is_stochastic})
+
         size = 30
         if self.data == 'mnsit':
             template = np.hstack([np.vstack([reshape_mnsit(j, self.test_x), reshape_mnsit(j, test_xhat)
@@ -204,7 +209,7 @@ class StochasticGenerativeHashing(object):
 
         plot_cost(self.train_cost)
         plot_recon(template=template)
-        test_recall = recall_n(test_data=y_test, train_data=y_train, data=self.data)
+        test_recall = recall_n(test_data=y_test_queries, train_data=y_train, data=self.data)
         sio.savemat(filename,
                     {'y_train': y_train, 'y_test': y_test, 'train_time': end_time,
                      'W_encode': W, 'b_encode': b, 'U': U,
