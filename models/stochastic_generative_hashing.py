@@ -221,7 +221,7 @@ class StochasticGenerativeHashing(object):
     @staticmethod
     def binarize(logits):
         epsilon = 0.5
-        pres = 1.0 / (1 + np.exp(-logits))
+        pres = 1.0 / (1 + np.exp(-logits + 1e-8))
         y_out = (np.sign(pres - epsilon) + 1.0) / 2.0
         return y_out
 
