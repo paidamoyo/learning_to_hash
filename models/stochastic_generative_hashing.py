@@ -25,7 +25,7 @@ class StochasticGenerativeHashing(object):
         self.learning_rate, self.beta1, self.beta2 = learning_rate, beta1, beta2
         self.log_file = 'stochastic_generative_hashing.log'
         self.data = data
-        self.model_results = 'SGH_{}_'.format(self.data)
+        self.model_results = 'SGH_{}'.format(self.data)
         logging.basicConfig(filename=self.log_file, filemode='w', level=logging.DEBUG)
         np.random.seed(seed)
         tf.set_random_seed(seed)
@@ -131,16 +131,18 @@ class StochasticGenerativeHashing(object):
             indx = np.random.choice(self.input_dim, self.batch_size)
             x_batch = self.train_x[indx]
             # Ending time.
-            _, x_recon_loss, batch_cost = self.session.run([self.optimize, self.x_recon_loss, self.cost],
-                                                           feed_dict={self.x: x_batch,
-                                                                      self.batch_size_tensor: self.batch_size,
-                                                                      self.stochastic: self.is_stochastic})
+            summary, _, x_recon_loss, batch_cost = self.session.run(
+                [self.merged, self.optimize, self.x_recon_loss, self.cost],
+                feed_dict={self.x: x_batch,
+                           self.batch_size_tensor: self.batch_size,
+                           self.stochastic: self.is_stochastic})
 
             if i % 100 == 0:
                 print_iteration = 'Num iteration: %d Total Loss: %0.04f Recon Loss %0.04f' % (
                     i, batch_cost, x_recon_loss)
                 print(print_iteration)
                 logging.debug(print_iteration)
+                self.train_writer.add_summary(summary, i)
                 self.train_cost.append(batch_cost)
                 self.train_recon.append(x_recon_loss)
 
