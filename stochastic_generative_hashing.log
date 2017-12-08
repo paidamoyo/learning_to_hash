@@ -3,13 +3,10 @@ DEBUG:root:train_mean:[ 130.71074  130.14036  131.05044 ...,  113.83058  113.906
 DEBUG:root:num batches:100.0, batch_size:500 epochs:50
 DEBUG:root:Training SGH_cifar_ Model:
 DEBUG:root:Parameters:, l2_reg:0.001, learning_rate:0.01, momentum: beta1=0.9 beta2=0.999, batch_size:500, batch_norm:True,latent_dim:64, num_of_batches:100.0, stochastic:True, data:cifar
-DEBUG:root:Num iteration: 0 Total Loss: 8832925.0000 Recon Loss 8832925.0000
-DEBUG:root:Num iteration: 100 Total Loss: 4703.7012 Recon Loss 4703.6963
-DEBUG:root:Num iteration: 200 Total Loss: 4052.9402 Recon Loss 4052.9355
-DEBUG:root:Num iteration: 300 Total Loss: 3901.8486 Recon Loss 3901.8440
-DEBUG:root:Num iteration: 400 Total Loss: 3955.5356 Recon Loss 3955.5310
-DEBUG:root:Num iteration: 500 Total Loss: 4163.4609 Recon Loss 4163.4561
-DEBUG:root:Num iteration: 600 Total Loss: 4035.5962 Recon Loss 4035.5916
-DEBUG:root:Num iteration: 700 Total Loss: 3892.8833 Recon Loss 3892.8787
-DEBUG:root:Num iteration: 800 Total Loss: 4013.6853 Recon Loss 4013.6807
-DEBUG:root:Num iteration: 900 Total Loss: 4006.9709 Recon Loss 4006.9663
+DEBUG:root:Num iteration: 0 Total Loss: 8605641.0000 Recon Loss 8605641.0000
+DEBUG:root:Num iteration: 100 Total Loss: 3988.6279 Recon Loss 3988.6233
+DEBUG:root:Num iteration: 200 Total Loss: 4052.0027 Recon Loss 4051.9980
+DEBUG:root:Num iteration: 300 Total Loss: 3900.8149 Recon Loss 3900.8103
+DEBUG:root:Num iteration: 400 Total Loss: 3952.1826 Recon Loss 3952.1780
+DEBUG:root:Num iteration: 500 Total Loss: 4162.7417 Recon Loss 4162.7368
+DEBUG:root:Num iteration: 600 Total Loss: 4033.0085 Recon Loss 4033.0039

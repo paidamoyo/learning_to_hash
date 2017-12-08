@@ -179,11 +179,11 @@ class StochasticGenerativeHashing(object):
 
         size = 30
         if self.data == 'mnsit':
-            template = np.hstack([np.vstack([reshape_mnsit(j, self.test_x[j]), reshape_mnsit(j, test_xhat)
+            template = np.hstack([np.vstack([reshape_mnsit(j, self.test_x), reshape_mnsit(j, test_xhat)
                                              ]) for j in range(size)])
         else:
             template = np.hstack(
-                [np.vstack([reshape_cifar(j, self.test_x[j]), reshape_cifar(j, test_xhat)
+                [np.vstack([reshape_cifar(j, self.test_x), reshape_cifar(j, test_xhat)
                             ]) for j in range(size)])
 
         train_xhat, train_recon_loss, train_cost, y_train = self.session.run(
