@@ -168,6 +168,7 @@ class StochasticGenerativeHashing(object):
         U = para_list['decode/w_decode:0']
         shift = para_list['scale/shift_para:0']
         scale = para_list['scale/scale_para:0']
+        self.saver.restore(sess=self.session, save_path=self.save_path)
 
         test_xhat, test_recon_loss, test_cost, y_test = self.session.run(
             [self.x_recon, self.x_recon_loss, self.cost, self.y_out],
